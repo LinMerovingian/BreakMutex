@@ -14,6 +14,6 @@ namespace BreakMutexApp
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool CloseRemote(
             uint dwProcessId,
-            [MarshalAs(UnmanagedType.LPWStr), In] string Name);
+            [MarshalAs(UnmanagedType.BStr), In] string Name);
     }
 }

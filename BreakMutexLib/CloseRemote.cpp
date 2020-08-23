@@ -18,6 +18,7 @@ BOOL CALLBACK EnumWndProc(HWND hWnd, LPARAM lParam)
 
 bool CloseRemote(ULONG dwProcessId, PCWSTR Name)
 {
+	auto rtn = false;
 	// create any file
 	HANDLE hFile = OpenMutex(MAXIMUM_ALLOWED, FALSE, Name);
 
@@ -62,7 +63,7 @@ bool CloseRemote(ULONG dwProcessId, PCWSTR Name)
 										{
 											// ここでmutex破壊してる
 											// TODO:戻り値確認、ここで破棄確認出来る？
-											::DuplicateHandle(hProcess, (HANDLE)Handles->HandleValue, 0, 0, 0, 0, DUPLICATE_CLOSE_SOURCE);
+											rtn = ::DuplicateHandle(hProcess, (HANDLE)Handles->HandleValue, 0, 0, 0, 0, DUPLICATE_CLOSE_SOURCE);
 										}
 
 									} while (Handles++, --NumberOfHandles);
@@ -81,6 +82,6 @@ bool CloseRemote(ULONG dwProcessId, PCWSTR Name)
 		}
 
 		::CloseHandle(hFile);
-		return true;
+		return rtn;
 	}
 }
