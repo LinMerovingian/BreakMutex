@@ -62,7 +62,10 @@ namespace BreakMutexApp
 						foreach (var mo in moc)
 						{
 							if (!string.IsNullOrWhiteSpace(txtSearchName.Text) && mo["Name"] != null && mo["Name"].ToString().IndexOf(txtSearchName.Text) == -1)
+							{
+								mo.Dispose();
 								continue;
+							}
 							GList.Add(new GridData
 							{
 								ProcessID = int.Parse(mo["ProcessId"].ToString()),
