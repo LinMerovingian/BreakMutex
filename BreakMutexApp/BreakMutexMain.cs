@@ -22,25 +22,31 @@ namespace BreakMutexApp
 		public BreakMutexMain()
 		{
 			InitializeComponent();
+			lblStatus.Text = string.Empty;
 		}
 
+		/// <summary>
+		/// 例外ダイアログ
+		/// </summary>
+		/// <param name="ex">例外</param>
+		/// <param name="msg">メッセージ</param>
 		private void ExceptionDlg(Exception ex, string msg = "")
 		{
 			MessageBox.Show($"Exception!!{(string.IsNullOrEmpty(msg) ? string.Empty : $"\n{msg}")}\n[{ex.GetType().ToString()}]\n{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 		}
 
-		private void InfoDlg(string msg)
+		/// <summary>
+		/// ダイアログ
+		/// </summary>
+		/// <param name="msg">メッセージ</param>
+		/// <param name="icon">アイコン</param>
+		private void Dlg(string msg, MessageBoxIcon icon)
 		{
-			MessageBox.Show(msg, "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
-		}
-
-		private void ErrorDlg(string msg)
-		{
-			MessageBox.Show(msg, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			MessageBox.Show(msg, "Message", MessageBoxButtons.OK, icon);
 		}
 
 		/// <summary>
-		/// プロセス読込
+		/// プロセス一覧読込
 		/// </summary>
 		/// <returns></returns>
 		private async Task<bool> LoadProcessList()
@@ -55,6 +61,8 @@ namespace BreakMutexApp
 					{
 						foreach (var mo in moc)
 						{
+							if (!string.IsNullOrWhiteSpace(txtSearchName.Text) && mo["Name"] != null && mo["Name"].ToString().IndexOf(txtSearchName.Text) == -1)
+								continue;
 							GList.Add(new GridData
 							{
 								ProcessID = int.Parse(mo["ProcessId"].ToString()),
@@ -66,6 +74,7 @@ namespace BreakMutexApp
 					}
 				});
 				GridProcessList.DataSource = GList;
+				GridProcessList.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
 				return true;
 			}
 			catch (Exception ex)
@@ -82,8 +91,7 @@ namespace BreakMutexApp
 		/// <param name="e"></param>
 		private async void BtnReload_Click(object sender, EventArgs e)
 		{
-			if (await LoadProcessList())
-				InfoDlg("Success.");
+			lblStatus.Text = $"Reload {(await LoadProcessList() ? "Success." : "Failed.")}";
 		}
 
 		/// <summary>
@@ -93,23 +101,25 @@ namespace BreakMutexApp
 		/// <param name="e"></param>
 		private async void BtnBreak_Click(object sender, EventArgs e)
 		{
+			Enabled = false;
+			var flg = true;
 			if (string.IsNullOrWhiteSpace(txtMutexName.Text))
 			{
-				ErrorDlg("Non mutex name.");
-				return;
+				Dlg("Non mutex name.", MessageBoxIcon.Error);
+				flg = false;
 			}
 			if (GridProcessList.SelectedRows == null)
 			{
-				ErrorDlg("Not selected process ID.");
-				return;
+				Dlg("Not selected process ID.", MessageBoxIcon.Error);
+				flg = false;
 			}
-			var flg = true;
-			foreach (DataGridViewRow item in GridProcessList.SelectedRows)
-				flg &= SafeNativeMethods.CloseRemote((uint)((GridData)(item.DataBoundItem)).ProcessID, txtMutexName.Text);
+			
 			if (flg)
-				InfoDlg("Success.");
-			else
-				ErrorDlg("Failed.");
+			foreach (DataGridViewRow item in GridProcessList.SelectedRows)
+				flg &= await Task.Run(() => SafeNativeMethods.CloseRemote((uint)((GridData)(item.DataBoundItem)).ProcessID, txtMutexName.Text));
+
+			lblStatus.Text = flg ? "Success." : "Failed.";
+			Enabled = true;
 		}
 
 		/// <summary>
@@ -119,7 +129,9 @@ namespace BreakMutexApp
 		/// <param name="e"></param>
 		private async void BreakMutexMain_Load(object sender, EventArgs e)
 		{
+			Enabled = false;
 			await LoadProcessList();
+			Enabled = true;
 		}
 	}
 	#endregion
