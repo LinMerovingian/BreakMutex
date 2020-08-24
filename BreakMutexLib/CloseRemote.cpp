@@ -1,21 +1,6 @@
 #include "pch.h"
 #include "CloseRemote.h"
 
-BOOL CALLBACK EnumWndProc(HWND hWnd, LPARAM lParam)
-{
-	std::wstring buff;
-	buff.resize(titleLen);
-	::GetWindowText(hWnd, &buff[0], titleLen);
-	buff.resize(titleLen - 1);
-	if (buff.find(((cell*)lParam)->WindowName, 0) != std::wstring::npos)
-	{
-		((cell*)lParam)->hWnd = hWnd;
-		((cell*)lParam)->WindowName.clear();
-		((cell*)lParam)->WindowName = buff.c_str();
-	}
-	return true;
-}
-
 bool CloseRemote(ULONG dwProcessId, PCWSTR Name)
 {
 	auto rtn = false;

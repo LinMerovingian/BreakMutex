@@ -57,5 +57,4 @@ struct cell
 	std::wstring WindowName;
 };
 
-BOOL CALLBACK EnumWndProc(HWND hWnd, LPARAM lParam);
 extern "C" MATHLIBRARY_API bool CloseRemote(ULONG dwProcessId, PCWSTR Name);
