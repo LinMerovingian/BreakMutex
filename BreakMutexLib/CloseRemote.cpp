@@ -82,6 +82,6 @@ bool CloseRemote(ULONG dwProcessId, PCWSTR Name)
 		}
 
 		::CloseHandle(hFile);
-		return rtn;
 	}
+	return rtn;
 }
