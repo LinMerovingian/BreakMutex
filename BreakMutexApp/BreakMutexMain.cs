@@ -112,7 +112,7 @@ namespace BreakMutexApp
 				Dlg("Non mutex name.", MessageBoxIcon.Error);
 				flg = false;
 			}
-			if (GridProcessList.SelectedRows == null)
+			if (GridProcessList.SelectedRows.Count == 0)
 			{
 				Dlg("Not selected process ID.", MessageBoxIcon.Error);
 				flg = false;
