@@ -57,4 +57,6 @@ struct cell
 	std::wstring WindowName;
 };
 
+bool SetPrivilege(HANDLE, LPCTSTR, bool);
+extern "C" MATHLIBRARY_API bool SetSeDebugPrivilege();
 extern "C" MATHLIBRARY_API bool CloseRemote(ULONG dwProcessId, PCWSTR Name);

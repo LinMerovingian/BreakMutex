@@ -10,6 +10,10 @@ namespace BreakMutexApp
 {
     internal static class SafeNativeMethods
     {
+        [DllImport("BreakMutexLib.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool SetSeDebugPrivilege();
+
         [DllImport("BreakMutexLib.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool CloseRemote(
