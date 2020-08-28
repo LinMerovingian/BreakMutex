@@ -61,14 +61,15 @@ namespace BreakMutexApp
 					{
 						foreach (var mo in moc)
 						{
-							if (!string.IsNullOrWhiteSpace(txtSearchName.Text) && mo["Name"] != null && mo["Name"].ToString().IndexOf(txtSearchName.Text) == -1)
+							if (mo["ProcessId"] == null || mo["Name"] == null || mo["ExecutablePath"] == null ||
+								(!string.IsNullOrWhiteSpace(txtSearchName.Text) && mo["Name"].ToString().IndexOf(txtSearchName.Text) == -1))
 							{
 								mo.Dispose();
 								continue;
 							}
 							GList.Add(new GridData
 							{
-								ProcessID = int.Parse(mo["ProcessId"].ToString()),
+								ProcessID = uint.Parse(mo["ProcessId"].ToString()),
 								ProcessName = mo["Name"]?.ToString(),
 								ProcessPath = mo["ExecutablePath"]?.ToString(),
 							});
@@ -119,7 +120,7 @@ namespace BreakMutexApp
 			
 			if (flg)
 			foreach (DataGridViewRow item in GridProcessList.SelectedRows)
-				flg &= await Task.Run(() => SafeNativeMethods.CloseRemote((uint)((GridData)(item.DataBoundItem)).ProcessID, txtMutexName.Text));
+				flg &= await Task.Run(() => SafeNativeMethods.CloseRemote(((GridData)(item.DataBoundItem)).ProcessID, txtMutexName.Text));
 
 			lblStatus.Text = flg ? "Success." : "Failed.";
 			Enabled = true;
@@ -133,8 +134,44 @@ namespace BreakMutexApp
 		private async void BreakMutexMain_Load(object sender, EventArgs e)
 		{
 			Enabled = false;
+			if (!await Task.Run(() => SafeNativeMethods.SetSeDebugPrivilege()))
+            {
+                Dlg("Failed:SeDebugPrivilege", MessageBoxIcon.Error);
+                Application.Exit();
+            }
 			await LoadProcessList();
 			Enabled = true;
+		}
+
+		/// <summary>
+		/// Column Header Mouse Click Event
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		private void GridProcessList_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+		{
+			// TODO:後で　バインドデータに対して操作が必要？
+			/*
+			if (GridProcessList.CurrentCell == null)
+				return;
+
+			//並び替える列を決める
+			var sortColumn = GridProcessList.CurrentCell.OwningColumn;
+
+			//並び替えの方向（昇順か降順か）を決める
+			ListSortDirection sortDirection = ListSortDirection.Ascending;
+			if (GridProcessList.SortedColumn != null &&
+				GridProcessList.SortedColumn.Equals(sortColumn))
+			{
+				sortDirection =
+					GridProcessList.SortOrder == SortOrder.Ascending ?
+					ListSortDirection.Descending : ListSortDirection.Ascending;
+			}
+
+			//並び替えを行う
+			GridProcessList.Sort(sortColumn, sortDirection);
+			//GridProcessList.Sort(GridProcessList.Columns[e.ColumnIndex], ListSortDirection.Ascending);
+			*/
 		}
 	}
 	#endregion
@@ -145,7 +182,7 @@ namespace BreakMutexApp
 		/// <summary>
 		/// Processs ID
 		/// </summary>
-		public int ProcessID { get; set; }
+		public uint ProcessID { get; set; }
 
 		/// <summary>
 		/// プロセス名

@@ -80,6 +80,7 @@
             this.GridProcessList.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.GridProcessList.Size = new System.Drawing.Size(703, 318);
             this.GridProcessList.TabIndex = 4;
+            this.GridProcessList.ColumnHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.GridProcessList_ColumnHeaderMouseClick);
             // 
             // processIDDataGridViewTextBoxColumn
             // 
