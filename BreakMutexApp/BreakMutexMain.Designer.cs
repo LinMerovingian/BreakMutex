@@ -28,13 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             this.label1 = new System.Windows.Forms.Label();
             this.GridProcessList = new System.Windows.Forms.DataGridView();
-            this.processIDDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.processNameDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.processPathDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.gridDataBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.btnReload = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.btnBreak = new System.Windows.Forms.Button();
@@ -44,7 +39,6 @@
             this.label3 = new System.Windows.Forms.Label();
             this.txtSearchName = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.GridProcessList)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridDataBindingSource)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -63,13 +57,7 @@
             this.GridProcessList.AllowUserToDeleteRows = false;
             this.GridProcessList.AllowUserToResizeColumns = false;
             this.GridProcessList.AllowUserToResizeRows = false;
-            this.GridProcessList.AutoGenerateColumns = false;
             this.GridProcessList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.GridProcessList.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.processIDDataGridViewTextBoxColumn,
-            this.processNameDataGridViewTextBoxColumn,
-            this.processPathDataGridViewTextBoxColumn});
-            this.GridProcessList.DataSource = this.gridDataBindingSource;
             this.GridProcessList.Location = new System.Drawing.Point(12, 41);
             this.GridProcessList.MultiSelect = false;
             this.GridProcessList.Name = "GridProcessList";
@@ -80,32 +68,6 @@
             this.GridProcessList.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.GridProcessList.Size = new System.Drawing.Size(703, 318);
             this.GridProcessList.TabIndex = 4;
-            this.GridProcessList.ColumnHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.GridProcessList_ColumnHeaderMouseClick);
-            // 
-            // processIDDataGridViewTextBoxColumn
-            // 
-            this.processIDDataGridViewTextBoxColumn.DataPropertyName = "ProcessID";
-            this.processIDDataGridViewTextBoxColumn.HeaderText = "ProcessID";
-            this.processIDDataGridViewTextBoxColumn.Name = "processIDDataGridViewTextBoxColumn";
-            this.processIDDataGridViewTextBoxColumn.ReadOnly = true;
-            // 
-            // processNameDataGridViewTextBoxColumn
-            // 
-            this.processNameDataGridViewTextBoxColumn.DataPropertyName = "ProcessName";
-            this.processNameDataGridViewTextBoxColumn.HeaderText = "ProcessName";
-            this.processNameDataGridViewTextBoxColumn.Name = "processNameDataGridViewTextBoxColumn";
-            this.processNameDataGridViewTextBoxColumn.ReadOnly = true;
-            // 
-            // processPathDataGridViewTextBoxColumn
-            // 
-            this.processPathDataGridViewTextBoxColumn.DataPropertyName = "ProcessPath";
-            this.processPathDataGridViewTextBoxColumn.HeaderText = "ProcessPath";
-            this.processPathDataGridViewTextBoxColumn.Name = "processPathDataGridViewTextBoxColumn";
-            this.processPathDataGridViewTextBoxColumn.ReadOnly = true;
-            // 
-            // gridDataBindingSource
-            // 
-            this.gridDataBindingSource.DataSource = typeof(BreakMutexApp.GridData);
             // 
             // btnReload
             // 
@@ -199,7 +161,6 @@
             this.Text = "BreakMutex";
             this.Load += new System.EventHandler(this.BreakMutexMain_Load);
             ((System.ComponentModel.ISupportInitialize)(this.GridProcessList)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridDataBindingSource)).EndInit();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -218,10 +179,6 @@
 		private System.Windows.Forms.ToolStripStatusLabel lblStatus;
 		private System.Windows.Forms.Label label3;
 		private System.Windows.Forms.TextBox txtSearchName;
-		private System.Windows.Forms.DataGridViewTextBoxColumn processIDDataGridViewTextBoxColumn;
-		private System.Windows.Forms.DataGridViewTextBoxColumn processNameDataGridViewTextBoxColumn;
-		private System.Windows.Forms.DataGridViewTextBoxColumn processPathDataGridViewTextBoxColumn;
-		private System.Windows.Forms.BindingSource gridDataBindingSource;
 	}
 }
 

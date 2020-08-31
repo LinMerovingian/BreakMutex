@@ -53,8 +53,8 @@ namespace BreakMutexApp
 		{
 			try
 			{
-				var GList = new ArrayList();
-				await Task.Run(() =>
+                var GList = new SortBindingList<GridData>();
+	            await Task.Run(() =>
 				{
 					using (var mc = new ManagementClass("Win32_Process"))
 					using (var moc = mc.GetInstances())
@@ -67,14 +67,14 @@ namespace BreakMutexApp
 								mo.Dispose();
 								continue;
 							}
-							GList.Add(new GridData
+                            GList.Add(new GridData
 							{
 								ProcessID = uint.Parse(mo["ProcessId"].ToString()),
 								ProcessName = mo["Name"]?.ToString(),
 								ProcessPath = mo["ExecutablePath"]?.ToString(),
 							});
 							mo.Dispose();
-						}
+                        }
 					}
 				});
 				GridProcessList.DataSource = GList;
@@ -95,7 +95,10 @@ namespace BreakMutexApp
 		/// <param name="e"></param>
 		private async void BtnReload_Click(object sender, EventArgs e)
 		{
+            lblStatus.Text = string.Empty;
+            Enabled = false;
 			lblStatus.Text = $"Reload {(await LoadProcessList() ? "Success." : "Failed.")}";
+            Enabled = true;
 		}
 
 		/// <summary>
@@ -135,49 +138,18 @@ namespace BreakMutexApp
 		{
 			Enabled = false;
 			if (!await Task.Run(() => SafeNativeMethods.SetSeDebugPrivilege()))
-            {
-                Dlg("Failed:SeDebugPrivilege", MessageBoxIcon.Error);
-                Application.Exit();
-            }
+			{
+				Dlg("Failed:SeDebugPrivilege", MessageBoxIcon.Error);
+				Application.Exit();
+			}
 			await LoadProcessList();
 			Enabled = true;
 		}
+    }
+    #endregion
 
-		/// <summary>
-		/// Column Header Mouse Click Event
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
-		private void GridProcessList_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
-		{
-			// TODO:後で　バインドデータに対して操作が必要？
-			/*
-			if (GridProcessList.CurrentCell == null)
-				return;
-
-			//並び替える列を決める
-			var sortColumn = GridProcessList.CurrentCell.OwningColumn;
-
-			//並び替えの方向（昇順か降順か）を決める
-			ListSortDirection sortDirection = ListSortDirection.Ascending;
-			if (GridProcessList.SortedColumn != null &&
-				GridProcessList.SortedColumn.Equals(sortColumn))
-			{
-				sortDirection =
-					GridProcessList.SortOrder == SortOrder.Ascending ?
-					ListSortDirection.Descending : ListSortDirection.Ascending;
-			}
-
-			//並び替えを行う
-			GridProcessList.Sort(sortColumn, sortDirection);
-			//GridProcessList.Sort(GridProcessList.Columns[e.ColumnIndex], ListSortDirection.Ascending);
-			*/
-		}
-	}
-	#endregion
-
-	#region GridData
-	class GridData
+    #region GridData
+    class GridData
 	{
 		/// <summary>
 		/// Processs ID
@@ -194,5 +166,153 @@ namespace BreakMutexApp
 		/// </summary>
 		public string ProcessPath { get; set; }
 	}
-	#endregion
+
+
+    // ほぼ流用・・・
+    /// <summary>
+    /// ソート可能なバインディングリストクラス
+    /// </summary>
+    /// <typeparam name="T">リスト内容</typeparam>
+    public class SortBindingList<T> : BindingList<T>
+        where T : class
+    {
+        /// <summary>
+        /// ソート済みか
+        /// </summary>
+        private bool isSorted;
+
+        /// <summary>
+        /// 並べ替え操作の方向
+        /// </summary>
+        private ListSortDirection sortDirection = ListSortDirection.Ascending;
+
+        /// <summary>
+        /// ソートを行う抽象化プロパティ
+        /// </summary>
+        private PropertyDescriptor sortProperty;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public SortBindingList()
+        {
+        }
+
+        /// <summary>
+        /// Constructor(IList)
+        /// </summary>
+        /// <param name="list">SortableBindingList に格納される System.Collection.Generic.IList</param>
+        public SortBindingList(IList<T> list)
+            : base(list)
+        {
+        }
+
+        /// <summary>
+        /// ソートサポートしているか
+        /// </summary>
+        protected override bool SupportsSortingCore
+        {
+            get { return true; }
+        }
+
+        /// <summary>
+        /// リストがソートされたかどうかを示す値を取得します。
+        /// </summary>
+        protected override bool IsSortedCore
+        {
+            get { return isSorted; }
+        }
+
+        /// <summary>
+        /// ソートされたリストの並べ替え操作の方向を取得します
+        /// </summary>
+        protected override ListSortDirection SortDirectionCore
+        {
+            get { return sortDirection; }
+        }
+
+        /// <summary>
+        /// ソートに利用する抽象化プロパティ取得
+        /// </summary>
+        protected override PropertyDescriptor SortPropertyCore
+        {
+            get { return sortProperty; }
+        }
+
+        /// <summary>
+        /// ApplySortCore で適用されたソート情報削除
+        /// </summary>
+        protected override void RemoveSortCore()
+        {
+            sortDirection = ListSortDirection.Ascending;
+            sortProperty = null;
+            isSorted = false;
+        }
+
+        /// <summary>
+        /// 指定されたプロパティおよび方向でソートを行います。
+        /// </summary>
+        /// <param name="prop">抽象化プロパティ</param>
+        /// <param name="direction">並べ替え操作の方向</param>
+        protected override void ApplySortCore(PropertyDescriptor prop, ListSortDirection direction)
+        {
+            // ソート情報記録
+            sortProperty = prop;
+            sortDirection = direction;
+
+            // ソートリスト取得
+            var list = Items as List<T>;
+            if (list == null)
+                return;
+
+            // ソート処理
+            list.Sort(Compare);
+            isSorted = true;
+
+            // ListChangedEvent
+            OnListChanged(new ListChangedEventArgs(ListChangedType.Reset, -1));
+        }
+
+        /// <summary>
+        /// 比較処理
+        /// </summary>
+        /// <param name="lhs">左側の値</param>
+        /// <param name="rhs">右側の値</param>
+        /// <returns>比較結果</returns>
+        private int Compare(T lhs, T rhs)
+        {
+            // 比較を行う
+            var result = OnComparison(lhs, rhs);
+
+            // 昇順の場合 そのまま、降順の場合 反転させる
+            return sortDirection == ListSortDirection.Ascending ? result : -result;
+        }
+
+        /// <summary>
+        /// 昇順比較処理
+        /// </summary>
+        /// <param name="lhs">左側の値</param>
+        /// <param name="rhs">右側の値</param>
+        /// <returns>比較結果</returns>
+        private int OnComparison(T lhs, T rhs)
+        {
+            var lhsValue = (lhs == null) ? null : sortProperty.GetValue(lhs);
+            var rhsValue = (rhs == null) ? null : sortProperty.GetValue(rhs);
+
+            if (lhsValue == null)
+                return rhsValue == null ? 0 : -1;
+
+            if (rhsValue == null)
+                return 1;
+
+            if (lhsValue is IComparable)
+                return ((IComparable)lhsValue).CompareTo(rhsValue);
+
+            if (lhsValue.Equals(rhsValue))
+                return 0;
+
+            return lhsValue.ToString().CompareTo(rhsValue.ToString());
+        }
+    }
+    #endregion
 }
