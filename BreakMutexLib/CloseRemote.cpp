@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "CloseRemote.h"
 
+// éQçlÅFhttps://support.microsoft.com/ja-jp/help/131065/how-to-obtain-a-handle-to-any-process-with-sedebugprivilege
 bool SetSeDebugPrivilege()
 {
 	HANDLE hToken;
